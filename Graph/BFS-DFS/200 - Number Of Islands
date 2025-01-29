@@ -1,0 +1,32 @@
+class Solution {
+private:
+    void dfs(int srcR, int srcC, vector<vector<int>>& visited, vector<vector<char>>& grid){
+        visited[srcR][srcC] = 1;
+        int distX[] = {-1,0,1,0};
+        int distY[] = {0,1,0,-1};
+        for(int i=0; i<4; i++){
+            int newR = srcR + distX[i];
+            int newC = srcC + distY[i];
+            if(newR >= 0 && newR < grid.size() && newC >=0 && newC < grid[0].size() &&
+                visited[newR][newC] == 0 && grid[newR][newC] == '1'){
+                    dfs(newR,newC,visited,grid);
+                }
+        }
+    }
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int islandNum = 0;
+        int rows = grid.size();
+        int cols = grid[0].size();
+        vector<vector<int>> visited(rows, vector<int>(cols, 0));
+        for(int i = 0; i<rows; i++){
+            for(int j = 0; j<cols; j++){
+                if(visited[i][j] == 0 && grid[i][j] == '1'){
+                    islandNum++;
+                    dfs(i,j,visited,grid);
+                }
+            }
+        }
+        return islandNum;
+    }
+};
