@@ -1,0 +1,51 @@
+class Solution {
+public:
+
+    const vector<pair<int, int>> distance = {{0, -1},  {0, 1},  {-1, 0}, {1, 0},
+                                         {-1, -1}, {1, -1}, {-1, 1}, {1, 1}};
+
+    bool isValid(int r, int c, vector<vector<int>>& grid) {
+        int n = grid.size();
+
+        return r >= 0 && r < n && c >= 0 && c < n && grid[r][c] == 0;
+    }
+    int shortestPathBinaryMatrix(vector<vector<int>>& grid) {
+        if (grid[0][0])
+            return -1;
+
+        int n = grid.size();
+
+        queue<pair<int, int>> queue;
+        queue.push({0, 0});
+
+        int visited[100][100] = {0};
+        visited[0][0] = 1;
+
+        int currDistance = 0;
+
+        while(!queue.empty()) { 
+
+            currDistance++;
+
+            int size = queue.size();
+
+            while(size--){
+                auto [r,c] = queue.front();
+                queue.pop();
+
+                if(r == n - 1 && c == n - 1) return currDistance;
+
+                for(auto dist : distance){
+                    int r_ = r + dist.first;
+                    int c_ = c + dist.second;
+
+                    if(isValid(r_,c_,grid) && !visited[r_][c_]){
+                        visited[r_][c_] = 1;
+                        queue.push({r_,c_});
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+};
