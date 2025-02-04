@@ -1,0 +1,82 @@
+class Solution {
+public:
+    vector<int> parent, rank;
+
+    int find(int node) {
+        if (parent[node] == node)
+            return node;
+        return parent[node] = find(parent[node]);
+    }
+
+    void unionByRank(int u, int v) {
+        int parent_u = find(u);
+        int parent_v = find(v);
+
+        if (parent_u != parent_v) {
+            if (rank[parent_u] > rank[parent_v]) {
+                parent[parent_v] = parent_u;
+            } else if (rank[parent_u] < rank[parent_v]) {
+                parent[parent_u] = parent_v;
+            } else {
+                parent[parent_v] = parent_u;
+                rank[parent_u]++;
+            }
+        }
+    }
+
+    int findMST(int n, vector<vector<int>>& edges, int forceIdx = -1, int skipIdx = -1) {
+        parent.resize(n);
+        rank.resize(n, 0);
+        for (int i = 0; i < n; i++) parent[i] = i;
+
+        int totalWeight = 0, edgesUsed = 0;
+
+        if (forceIdx != -1) {
+            int u = edges[forceIdx][0], v = edges[forceIdx][1], w = edges[forceIdx][2];
+            if (find(u) != find(v)) {
+                unionByRank(u, v);
+                totalWeight += w;
+                edgesUsed++;
+            }
+        }
+
+        for (int i = 0; i < edges.size(); i++) {
+            if (i == skipIdx) continue;
+            int u = edges[i][0], v = edges[i][1], w = edges[i][2];
+            if (find(u) != find(v)) {
+                unionByRank(u, v);
+                totalWeight += w;
+                edgesUsed++;
+            }
+        }
+
+        if (edgesUsed == n - 1) return totalWeight;
+        return INT_MAX;
+    }
+
+    vector<vector<int>> findCriticalAndPseudoCriticalEdges(int n, vector<vector<int>>& edges) {
+        for (int i = 0; i < edges.size(); i++) {
+            edges[i].push_back(i);
+        }
+
+        sort(edges.begin(), edges.end(), [](const vector<int>& a, const vector<int>& b) {
+            return a[2] < b[2];
+        });
+
+        int mstWeight = findMST(n, edges);
+
+        vector<int> criticalEdges;
+        vector<int> pseudoCriticalEdges;
+
+        for (int i = 0; i < edges.size(); i++) {
+            if (findMST(n, edges, -1, i) > mstWeight) {
+                criticalEdges.push_back(edges[i][3]);
+            }
+            else if (findMST(n, edges, i, -1) == mstWeight) {
+                pseudoCriticalEdges.push_back(edges[i][3]);
+            }
+        }
+
+        return {criticalEdges, pseudoCriticalEdges};
+    }
+};
