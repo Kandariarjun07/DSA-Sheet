@@ -1,0 +1,62 @@
+class Solution {
+    vector<int> parent, rank;
+
+    int find(int node) {
+        if (parent[node] == node)
+            return node;
+        return parent[node] = find(parent[node]);
+    }
+
+    void unionByRank(int u, int v) {
+        int parent_u = find(u);
+        int parent_v = find(v);
+
+        if (parent_u != parent_v) {
+            if (rank[parent_u] > rank[parent_v]) {
+                parent[parent_v] = parent_u;
+            } else if (rank[parent_u] < rank[parent_v]) {
+                parent[parent_u] = parent_v;
+            } else {
+                parent[parent_v] = parent_u;
+                rank[parent_u]++;
+            }
+        }
+    }
+
+public:
+    int minCostConnectPoints(vector<vector<int>>& points) {
+        int n = points.size();
+
+        parent.resize(n);
+        rank.resize(n,0);
+        for(int i = 0; i<n; i++) {
+            parent[i] = i;
+        }
+
+        vector<vector<int>> adj;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i == j)
+                    continue;
+                int u = i, v = j;
+                int wt = abs(points[i][0] - points[j][0]) +
+                         abs(points[i][1] - points[j][1]);
+                adj.push_back({u, v, wt});
+            }
+        }
+        sort(adj.begin(), adj.end(), [](const vector<int>& a, const vector<int>& b) {
+            return a[2] < b[2];
+        });
+        int result = 0;
+        for(auto edge : adj) {
+            int u = edge[0];
+            int v = edge[1];
+            int wt = edge[2];
+            if(find(u) != find(v)) {
+                result += wt;
+                unionByRank(u,v);
+            }
+        }
+        return result;
+    }
+};
